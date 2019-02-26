@@ -1,0 +1,8 @@
+Screen dùng để đọc dữ liệu từ serial 
+
+sudo apt-get install screen
+VD:
+Uart path: /dev/ttyUSB0
+baud rate: 115200
+==> 
+screen /dev/ttyUSB0 115200
