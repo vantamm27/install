@@ -1,0 +1,13 @@
+Sử dụng lệnh dd để gi file .iso .img vào ổ đĩa 
+B1: Xác định điểm mount của ổ đĩa
+    sudo fdisk 
+    ==>
+    Disk /dev/sda: 14,9 GiB, 15931539456 bytes, 31116288 sectors
+    Units: sectors of 1 * 512 = 512 bytes
+    Sector size (logical/physical): 512 bytes / 512 bytes
+    I/O size (minimum/optimal): 512 bytes / 512 bytes
+    Disklabel type: dos
+    Disk identifier: 0x00000000
+    
+B2: Dùng lệnh dd để ghi file  .ios hoặc .img  vào ổ đĩa 
+    dd if=/media/tamvv/Data1/software/2018-04-18-raspbian-stretch.img of=/dev/sda bs=4096  status=progress
