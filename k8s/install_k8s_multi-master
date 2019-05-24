@@ -1,10 +1,13 @@
 Yeu cau 3 node master, 3 node worker
 
 #1 install etcd cluster
+https://github.com/vantamm27/install/blob/master/install_etcd_cluster
 
 #2 install docker 
+https://github.com/vantamm27/install/blob/master/install_docker
 
 #3 install k8s
+https://github.com/vantamm27/install/blob/master/k8s/install_k8s
 
 #4 init k8s with kubeadm
 # tao file
