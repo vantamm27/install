@@ -1,0 +1,22 @@
+Installing cfssl
+#1- Download the binaries
+wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+
+#2- Add the execution permission to the binaries
+chmod +x cfssl*
+
+#3- Move the binaries to /usr/local/bin
+sudo mv cfssl_linux-amd64 /usr/local/bin/cfssl
+sudo mv cfssljson_linux-amd64 /usr/local/bin/cfssljson
+
+#4- Verify the installation.
+cfssl version
+
+==>
+cfssl version
+
+Version: 1.2.0
+Revision: dev
+Runtime: go1.6
+

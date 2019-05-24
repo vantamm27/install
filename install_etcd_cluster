@@ -1,0 +1,146 @@
+Install etcd cluster
+# install etcd cluster tren 3 node 10.0.150.2 10.0.150.3 10.0.150.4
+
+#1- install cfssl
+#2 generating the tls certificates
+
+#2.1 create  the certificate  authority
+
+cat >  ca-config.json <<EOF
+{
+  "signing": {
+    "default": {
+      "expiry": "8760h"
+    },
+    "profiles": {
+      "kubernetes": {
+        "usages": ["signing", "key encipherment", "server auth", "client auth"],
+        "expiry": "8760h"
+      }
+    }
+  }
+}
+EOF
+
+#2.2 create the certificate authority signing request configuration file 
+cat > ca-csr.json <<EOF
+{
+  "CN": "Kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+  {
+    "C": "IE",
+    "L": "Cork",
+    "O": "Kubernetes",
+    "OU": "CA",
+    "ST": "Cork Co."
+  }
+ ]
+}
+EOF
+
+#2.3 Generate the certificate authority caertificate and private key
+cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+
+#2.4 Create the certificate signing request configuration file
+
+cat > kubernetes-csr.json <<EOF
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+  {
+    "C": "IE",
+    "L": "Cork",
+    "O": "Kubernetes",
+    "OU": "Kubernetes",
+    "ST": "Cork Co."
+  }
+ ]
+}
+EOF
+
+#2.5 Generate the certificate and private key
+
+cfssl gencert \
+-ca=ca.pem \
+-ca-key=ca-key.pem \
+-config=ca-config.json \
+-hostname=10.0.150.2,10.0.150.3,10.0.150.4,127.0.0.1,kubernetes.default \
+-profile=kubernetes kubernetes-csr.json | \
+cfssljson -bare kubernetes
+
+# hostname la ip server, copy file ca.pem, kubernetes.pem, kubernetes-key.pem len server cai etcd cluster
+
+#3 create a configuration directory for Etcd
+
+sudo mkdir /etc/etcd /var/lib/etcd
+
+#4 Move the certificates to the configuration directory
+mv ~/ca.pem ~/kubernetes.pem ~/kubernetes-key.pem /etc/etcd
+
+#5 Download the etcd binaries.
+wget https://github.com/coreos/etcd/releases/download/v3.3.9/etcd-v3.3.9-linux-amd64.tar.gz
+
+#6 Extract the etcd archive.
+tar xvzf etcd-v3.3.9-linux-amd64.tar.gz
+
+#7 Move the etcd binaries to /usr/local/bin.
+mv etcd-v3.3.9-linux-amd64/etcd* /usr/local/bin/
+
+# Create an etcd systemd unit file.
+cat > /etc/systemd/system/etcd.service <<EOF
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos
+
+[Service]
+ExecStart=/usr/local/bin/etcd \
+  --name 10.0.150.2 \
+  --cert-file=/etc/etcd/kubernetes.pem \
+  --key-file=/etc/etcd/kubernetes-key.pem \
+  --peer-cert-file=/etc/etcd/kubernetes.pem \
+  --peer-key-file=/etc/etcd/kubernetes-key.pem \
+  --trusted-ca-file=/etc/etcd/ca.pem \
+  --peer-trusted-ca-file=/etc/etcd/ca.pem \
+  --peer-client-cert-auth \
+  --client-cert-auth \
+  --initial-advertise-peer-urls https://10.0.150.2:2380 \
+  --listen-peer-urls https://10.0.150.2:2380 \
+  --listen-client-urls https://10.0.150.2:2379,http://127.0.0.1:2379 \
+  --advertise-client-urls https://10.0.150.2:2379 \
+  --initial-cluster-token etcd-cluster-0 \
+  --initial-cluster 10.0.150.2=https://10.0.150.2:2380,10.0.150.3=https://10.0.150.3:2380,10.0.150.4=https://10.0.150.4:2380 \
+  --initial-cluster-state new \
+  --data-dir=/var/lib/etcd
+Restart=on-failure
+RestartSec=5
+
+
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#8 Reload the daemon configuration.
+systemctl daemon-reload
+
+#9 Enable etcd to start at boot time.
+systemctl daemon-reload
+
+#8 Start etcd.
+systemctl start etcd
+
+
+# lap lai buoc 4-9 tren cac server cai etcd cluster
+
+
+
+
+
