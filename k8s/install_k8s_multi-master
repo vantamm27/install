@@ -1,0 +1,57 @@
+Yeu cau 3 node master, 3 node worker
+
+#1 install etcd cluster
+
+#2 install docker 
+
+#3 install k8s
+
+#4 init k8s with kubeadm
+# tao file
+cat > config.yaml <<EOF
+apiVersion: kubeadm.k8s.io/v1alpha2
+kind: MasterConfiguration
+kubernetesVersion: stable-1.11
+apiServerCertSANs:
+- 10.0.150.2
+- 10.0.150.3
+- 10.0.150.4
+controlPlaneEndpoint: "10.0.150.2:6443"
+etcd:
+  external:
+    endpoints:
+    - https://10.0.150.2:2379
+    - https://10.0.150.3:2379
+    - https://10.0.150.4:2379
+    caFile: /etc/etcd/ca.pem
+    certFile: /etc/etcd/kubernetes.pem
+    keyFile: /etc/etcd/kubernetes-key.pem
+networking:
+  podSubnet: 10.244.0.0/16
+apiServerExtraArgs:
+  apiserver-count: "3"
+EOF
+
+#5 Initialize the machine as a master node.
+kubeadm init --config=config.yaml
+
+#6 Copy the certificates to the two other masters.
+# copy cac thu muc  /etc/kubernetes/pki
+# remove cac file apiserver.*
+
+#7 thuc hien buoc 4, 5 tren cac server master
+# doi controlPlaneEndpoint cho phu hop
+
+#8 Join worker vao cluster
+sudo kubeadm join 10.0.150.2:6443 --token [your_token] --discovery-token-ca-cert-hash sha256:[your_token_ca_cert_hash]
+
+#9 Verifying
+kubectl --kubeconfig /etc/kubernetes/admin.conf get nodes
+
+#10 deploy overlay network
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
+
+
+#
+
+
