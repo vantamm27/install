@@ -11,3 +11,8 @@ B1: Xác định điểm mount của ổ đĩa
     
 B2: Dùng lệnh dd để ghi file  .ios hoặc .img  vào ổ đĩa 
     dd if=/media/tamvv/Data1/software/2018-04-18-raspbian-stretch.img of=/dev/sda bs=4096  status=progress
+    
+    
+###########
+Backup images
+sudo dd bs=1m if=/dev/sda of=/media/tamvv/SSD/rasberry_gmt.img status=progress
