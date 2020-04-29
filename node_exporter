@@ -32,5 +32,21 @@ systemctl enable node_exporter
 systemctl start node_exporter
 systemctl status node_exporter
 
+mkdir -p  /media/iot/node_exporter
+nano /media/iot/node_exporter/push_node_exporter_metrics.sh
+#cat << EOF >> /media/iot/node_exporter/push_node_exporter_metrics.sh
 
+export PUSHGATEWAY_SERVER='http://'
+export NODE_NAME="pi"
+
+cat << EOF >> ./push_node_exporter_metrics.sh
+#!/bin/bash
+PUSHGATEWAY_SERVER="$PUSHGATEWAY_SERVER"
+NODE_NAME="$NODE_NAME"
+curl -s localhost:9100/metrics | curl -u USERNAME:PASSWORD --data-binary @- \$PUSHGATEWAY_SERVER/metrics/job/node-exporter/instance/\$NODE_NAME
+
+EOF
+
+chmod +x  /media/iot/node_exporter/push_node_exporter_metrics.sh
+cat /media/iot/node_exporter/push_node_exporter_metrics.sh
 
