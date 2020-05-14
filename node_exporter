@@ -5,7 +5,7 @@ curl -LO https://github.com/prometheus/node_exporter/releases/download/v$NODE_EX
 
 tar xvf node_exporter-$NODE_EXPORTER_VER.linux-amd64.tar.gz
 
-mv node_exporter-$NODE_EXPORTER_VER.linux-armv7/node_exporter /usr/local/bin/node_exporter
+mv node_exporter-$NODE_EXPORTER_VER.linux-amd64/node_exporter /usr/local/bin/node_exporter
 
 useradd -m -s /bin/bash node_exporter
 
