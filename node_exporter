@@ -1,0 +1,47 @@
+#!/bin/bash
+
+NODE_EXPORTER_VER=0.18.1
+curl -LO https://github.com/prometheus/node_exporter/releases/download/v$NODE_EXPORTER_VER/node_exporter-$NODE_EXPORTER_VER.linux-armv7.tar.gz
+
+tar xvf node_exporter-$NODE_EXPORTER_VER.linux-amd.tar.gz
+
+mv node_exporter-$NODE_EXPORTER_VER.linux-armv7/node_exporter /usr/local/bin/node_exporter
+
+useradd -m -s /bin/bash node_exporter
+
+cat << EOF >> /etc/systemd/system/node_exporter.service
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+[Service]
+User=node_exporter
+Group=node_exporter
+Type=simple
+ExecStart=/usr/local/bin/node_exporter
+Restart=on-failure
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl daemon-reload
+systemctl enable node_exporter
+systemctl start node_exporter
+systemctl status node_exporter
+
+mkdir -p  /media/iot/node_exporter
+nano /media/iot/node_exporter/push_node_exporter_metrics.sh
+#cat << EOF >> /media/iot/node_exporter/push_node_exporter_metrics.sh
+
+export PUSHGATEWAY_SERVER='http://'
+export NODE_NAME="pi"
+
+cat << EOF >> ./push_node_exporter_metrics.sh
+#!/bin/bash
+PUSHGATEWAY_SERVER="$PUSHGATEWAY_SERVER"
+NODE_NAME="$NODE_NAME"
+curl -s localhost:9100/metrics | curl -u USERNAME:PASSWORD --data-binary @- \$PUSHGATEWAY_SERVER/metrics/job/node-exporter/instance/\$NODE_NAME
+EOF
+
+chmod +x  /media/iot/node_exporter/push_node_exporter_metrics.sh
+cat /media/iot/node_exporter/push_node_exporter_metrics.sh
